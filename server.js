@@ -28,6 +28,16 @@ const respostasAutomaticas = {
   'obrigado': 'De nada! Se precisar de mais alguma coisa, é só chamar.'
 };
 
+app.get('/messages', async (req, res) => {
+  try {
+    const messages = await Message.find({});
+    res.send(messages);
+  } catch (err) {
+    console.error('Error fetching messages:', err);
+    res.sendStatus(500);
+  }
+});
+
 app.post('/messages', async (req, res) => {
   try {
     const userMessage = req.body.message.toLowerCase();
