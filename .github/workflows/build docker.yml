@@ -15,3 +15,25 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t img-api-msg .
+      - name: Tag Docker Image
+        run: docker tag your-image-name your-image-name:latest
+
+      - name: Push Docker Image
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker push your-image-name:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            docker stop your-container-name
+            docker pull your-image-name:latest
+            docker run -d -p 3000:3000 --name your-container-name your-image-name:latest
