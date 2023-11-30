@@ -7,9 +7,10 @@ Aplicação básica para mensagens em tempo real com respostas pré-definidas au
 - Docker
 
 ## Configuração local
-1. Clone este repositório.
+1. Clone este repositório
 2. altere o endereço no arquivo index.html para localhost:3000
-3. Build a imagem do docker e rode em seguida
+3. npm install
+4. npm start
 
 ## Rotas da API
 - `/messages` (GET): Mostra todas as mensagens armazenadas.
