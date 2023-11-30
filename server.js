@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const socketIO = require('socket.io');
 const mongoose = require('mongoose');
+const Message = require('./messageModel');
 
 const app = express();
 const server = http.Server(app);
@@ -12,15 +13,9 @@ app.use(express.static(__dirname));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const Message = mongoose.model('Message', {
-  name: String,
-  message: String
-});
-
 const dbUrl =
   'mongodb+srv://iriscafe:iriscafe@cluster0.uzqlaev.mongodb.net/?retryWrites=true&w=majority';
 
-// Configuração de respostas automáticas
 const respostasAutomaticas = {
   'oi': 'Oi! Como posso ajudar você?',
   'olá': 'Olá! Como posso ajudar você?',
@@ -33,23 +28,12 @@ const respostasAutomaticas = {
   'obrigado': 'De nada! Se precisar de mais alguma coisa, é só chamar.'
 };
 
-app.get('/messages', async (req, res) => {
-  try {
-    const messages = await Message.find({});
-    res.send(messages);
-  } catch (err) {
-    console.error('Error fetching messages:', err);
-    res.sendStatus(500);
-  }
-});
-
 app.post('/messages', async (req, res) => {
   try {
     const userMessage = req.body.message.toLowerCase();
-
     const message = new Message(req.body);
-
     const savedMessage = await message.save();
+
     console.log('Message saved');
 
     const censored = await Message.findOne({ message: 'badword' });
@@ -57,18 +41,9 @@ app.post('/messages', async (req, res) => {
       await Message.deleteOne({ _id: censored.id });
     } else {
       io.emit('message', req.body);
-
-      for (const palavraChave in respostasAutomaticas) {
-        if (userMessage.includes(palavraChave)) {
-          const appResponse = {
-            name: 'My App',
-            message: respostasAutomaticas[palavraChave]
-          };
-          io.emit('message', appResponse);
-          break;
-        }
-      }
+      checkAndRespond(userMessage);
     }
+
     res.sendStatus(200);
   } catch (error) {
     console.error('Error posting message:', error);
@@ -77,6 +52,33 @@ app.post('/messages', async (req, res) => {
     console.log('Message Posted');
   }
 });
+
+function checkAndRespond(userMessage) {
+  for (const keyword in respostasAutomaticas) {
+    if (userMessage.includes(keyword)) {
+      const appResponse = {
+        name: 'My App',
+        message: respostasAutomaticas[keyword],
+      };
+      io.emit('message', appResponse);
+      saveAutoResponse(appResponse);
+      break;
+    }
+  }
+}
+
+async function saveAutoResponse(response) {
+  try {
+    const autoResponseMessage = new Message({
+      name: response.name,
+      message: response.message,
+    });
+    await autoResponseMessage.save();
+    console.log('Auto response saved');
+  } catch (error) {
+    console.error('Error saving auto response:', error);
+  }
+}
 
 io.on('connection', () => { 
   console.log('A user is connected');
