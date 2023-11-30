@@ -38,5 +38,5 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             docker stop your-container-name
-            docker pull your-image-name:latest
-            docker run -d -p 3000:3000 --name your-container-name your-image-name:latest
+            docker pull iriscafe50/img-api-msg:latest
+            docker run -d -p 3000:3000 --name img-api-msg iriscafe50/img-api-msg:latest
