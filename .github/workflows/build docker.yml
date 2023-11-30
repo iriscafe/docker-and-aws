@@ -39,4 +39,4 @@ jobs:
           script: |
             docker stop $(docker ps -q)
             docker pull iriscafe50/img-api-msg:latest
-            docker run -d -p 3000:3000 --name container-msg iriscafe50/img-api-msg:latest
+            docker run -d -p 3000:3000 iriscafe50/img-api-msg:latest
