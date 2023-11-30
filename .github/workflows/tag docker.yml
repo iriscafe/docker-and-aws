@@ -1,0 +1,16 @@
+name: Docker Tag
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Tag Docker Image
+        run: docker tag img-api-msg:latest iriscafe50/img-api-msg:latest
